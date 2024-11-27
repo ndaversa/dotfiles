@@ -99,6 +99,11 @@ set cc=80          " set colorcolumn 80 to visualize 80th column
 set wildmenu
 set wildmode=list:longest,full
 
+"" Undo
+set hidden     " Allow backgrounding buffers without writing them, and remember marks/undo for backgrounded buffers
+set undofile   " Maintain undo history between sessions
+set undodir=~/.vim/undodir
+
 " Fern, nerdtree replacement
 nnoremap <leader>n :Fern . -drawer -toggle<CR> 
 
