@@ -8,18 +8,47 @@ endif
 " Setup plugins
 call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
 Plug 'altercation/vim-colors-solarized'
 call plug#end() 
 
-" Enable syntax highlighting
-syntax enable
+syntax enable       " Enable syntax highlighting
+set number          " Enable line numbers
+set relativenumber  " Show relative line numbers
+filetype plugin on  " Automatically detect filetype and load plugins
 
-" Automatically detect filetype and load plugins
-filetype plugin on
+"" Mappings
+let mapleader=";"
 
-" In insert mode map a double-j to the esc key
+"In insert mode map a double j to the esc key
 inoremap jj <Esc>
+
+"Disable <Esc> to undo muscle memory
+inoremap <Esc> <CR>
+
+" Turn backup off, since most stuff is in git anyway...
+set nobackup
+set nowb
+set noswapfile
+
+"" Whitespace
+set nowrap          " don't wrap lines
+set tabstop=2       " a tab is two spaces
+set shiftwidth=2    " an autoindent (with <<) is two spaces
+set expandtab       " use spaces, not tabs
+set backspace=indent,eol,start    " backspace through everything in insert mode
+
+" This sends all yanks to the system clipboard (requires building vim with +clipboard support)
+set clipboard=unnamed
 
 " Use solarized for syntax highlightling
 let g:solarized_visibility = "high"
 colorscheme solarized
+
+set ruler      " show the cursor position all the time
+set number     " show line numbers
+set cursorline " draw a line on the same as the cursor position
+set mouse=a    " enable mouse support
+set showcmd    " display incomplete commands
+set title      " set the screen title to the currently opened file
