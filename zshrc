@@ -73,14 +73,14 @@ DEFAULT_USER="ndaversa"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-	1password
-	git
-	github
-	brew
-	vi-mode
-	iterm2
-	macos
-	ssh
+  1password
+  git
+  github
+  brew
+  vi-mode
+  iterm2
+  macos
+  ssh
 )
 
 source $ZSH/oh-my-zsh.sh
