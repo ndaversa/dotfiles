@@ -50,7 +50,7 @@
     "Alpha Component" : 1,
     "Green Component" : 0.97999999999999998
   },
-  "Columns" : 160,
+  "Columns" : 180,
   "Ansi 8 Color" : {
     "Red Component" : 0.40781760215759277,
     "Color Space" : "sRGB",
@@ -135,7 +135,8 @@
     "Green Component" : 0.21176470588235294
   },
   "Silence Bell" : false,
-  "Rows" : 43,
+  "Rows" : 56,
+  "Draw Powerline Glyphs" : true,
   "Guid" : "A7025F4B-4E14-4DF0-9A63-8F6ADD4E132E",
   "Ansi 14 Color (Dark)" : {
     "Red Component" : 0.57647058823529407,
@@ -188,6 +189,7 @@
     "Alpha Component" : 0.25,
     "Green Component" : 0.92047786712646484
   },
+  "ASCII Ligatures" : false,
   "Send Code When Idle" : false,
   "Ansi 6 Color" : {
     "Red Component" : 0,
@@ -476,7 +478,7 @@
     "Alpha Component" : 1,
     "Green Component" : 0.7607843279838562
   },
-  "Normal Font" : "InconsolataForPowerline-dz 15",
+  "Normal Font" : "Inconsolata-Regular_Medium 15",
   "Unlimited Scrollback" : true,
   "Ansi 12 Color (Light)" : {
     "Red Component" : 0.51372549019607838,
