@@ -48,6 +48,20 @@ map <c-space> ?
 " clear the search buffer when hitting ;return
 map <silent> <leader><cr> :noh<cr>
 
+" easier navigation between split windows
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-h> <c-w>h
+nnoremap <c-l> <c-w>l
+
+" resize windows quickly using arrow keys
+nnoremap <Right> :vertical resize +3<cr>
+nnoremap <Left> :vertical resize -3<cr>
+nnoremap <Up> :resize +3<cr>
+nnoremap <Down> :resize -3<cr>
+nnoremap <Bar> <c-w><Bar>
+nnoremap = <c-w>=
+
 " Turn backup off, since most stuff is in git anyway...
 set nobackup
 set nowb
