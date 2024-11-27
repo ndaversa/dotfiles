@@ -14,6 +14,8 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'itchyny/lightline.vim'
 Plug 'lambdalisue/fern.vim'
 Plug 'ycm-core/YouCompleteMe'
+Plug 'kchmck/vim-coffee-script'
+Plug 'ctrlpvim/ctrlp.vim'
 call plug#end() 
 
 syntax enable       " Enable syntax highlighting
@@ -85,3 +87,14 @@ set wildmode=list:longest,full
 
 " Fern, nerdtree replacement
 nnoremap <leader>n :Fern . -drawer -toggle<CR> 
+
+" CtrlP
+let g:ctrlp_custom_ignore = 'node_modules'
+let g:ctrlp_working_path_mode = 'rw'
+let g:ctrlp_match_window_bottom = 1
+let g:ctrlp_match_window_reversed = 1
+let g:ctrlp_dotfiles = 1 "so ctrlp won't search dotfiles/dotdirs
+let g:ctrlp_follow_symlinks = 1
+let g:ctrlp_map = '<leader>f'
+let g:ctrlp_regexp = 0
+let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard | grep -v "node_modules"']
