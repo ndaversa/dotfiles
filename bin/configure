@@ -1,3 +1,13 @@
 #!/bin/bash
 
+# Make symlinks for dotfiles
 ln -sf ~/dev/dotfiles/zshrc ~/.zshrc
+ln -sf ~/dev/dotfiles/vimrc ~/.vimrc
+
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Brew some things
+brew install gpg
+brew install gnupg
+brew install vim
