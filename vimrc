@@ -11,6 +11,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'altercation/vim-colors-solarized'
+Plug 'itchyny/lightline.vim'
+Plug 'lambdalisue/fern.vim'
 call plug#end() 
 
 syntax enable       " Enable syntax highlighting
@@ -19,6 +21,8 @@ filetype plugin on  " Automatically detect filetype and load plugins
 " Use solarized for syntax highlightling
 let g:solarized_visibility = "high"
 colorscheme solarized
+set laststatus=2 "Needed for lightline.vim
+let g:lightline = {'colorscheme': 'solarized'}
 
 "" Mappings
 let mapleader=";"
@@ -37,6 +41,9 @@ vnoremap . :norm.<CR>
 " Map space to / (search) and c-space to ? (backgwards search)
 map <space> /
 map <c-space> ?
+
+" clear the search buffer when hitting ;return
+map <silent> <leader><cr> :noh<cr>
 
 " Turn backup off, since most stuff is in git anyway...
 set nobackup
@@ -72,3 +79,8 @@ set incsearch      " incremental searching
 set ignorecase     " searches are case insensitive...
 set smartcase      " ... unless they contain at least one capital letter
 set cc=80          " set colorcolumn 80 to visualize 80th column
+set wildmenu
+set wildmode=list:longest,full
+
+" Fern, nerdtree replacement
+nnoremap <leader>n :Fern . -drawer -toggle<CR> 
