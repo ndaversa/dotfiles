@@ -13,6 +13,7 @@ Plug 'tpope/vim-commentary'
 Plug 'altercation/vim-colors-solarized'
 Plug 'itchyny/lightline.vim'
 Plug 'lambdalisue/fern.vim'
+Plug 'ycm-core/YouCompleteMe'
 call plug#end() 
 
 syntax enable       " Enable syntax highlighting

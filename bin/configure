@@ -11,3 +11,11 @@ ln -sf ~/dev/dotfiles/vimrc ~/.vimrc
 brew install gpg
 brew install gnupg
 brew install vim
+
+#YouCompleteMe deps
+brew install cmake python go nodejs
+brew install mono
+brew install llvm
+
+cd ~/.vim/plugged/YouCompleteMe
+python3 install.py --all
