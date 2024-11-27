@@ -21,11 +21,16 @@ filetype plugin on  " Automatically detect filetype and load plugins
 "" Mappings
 let mapleader=";"
 
-"In insert mode map a double j to the esc key
-inoremap jj <Esc>
+"Use hh,jj, or kk to <ESC>
+inoremap hh <ESC>
+inoremap jj <ESC>
+inoremap kk <ESC>
 
 "Disable <Esc> to undo muscle memory
 inoremap <Esc> <CR>
+
+"Enable repeat operation in visual mode
+vnoremap . :norm.<CR>
 
 " Turn backup off, since most stuff is in git anyway...
 set nobackup
