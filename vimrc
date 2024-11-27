@@ -47,6 +47,7 @@ set noswapfile
 set number              " Enable line numbers
 set relativenumber      " Show relative line numbers
 set scrolljump=8        " Scroll 8 lines at a time at bottom/top
+set scrolloff=3         " provide some context when editing
 
 "" Whitespace
 set nowrap               " don't wrap lines
