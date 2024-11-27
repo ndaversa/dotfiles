@@ -4,6 +4,11 @@
 ln -sf ~/dev/dotfiles/zshrc ~/.zshrc
 ln -sf ~/dev/dotfiles/vimrc ~/.vimrc
 
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-completions.git ~/.oh-my-zsh/custom/plugins/zsh-completions
+git clone https://github.com/zsh-users/zsh-history-substring-search.git ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search
+
 # Run the plug installation command so YouCompleteMe is cloned for later steps
 vim +PlugInstall +qall
 

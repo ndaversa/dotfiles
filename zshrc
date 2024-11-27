@@ -81,7 +81,13 @@ plugins=(
   iterm2
   macos
   ssh
+  zsh-autosuggestions
+  zsh-completions 
+  zsh-history-substring-search 
+  zsh-syntax-highlighting
 )
+source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 source $ZSH/oh-my-zsh.sh
 
