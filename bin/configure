@@ -4,6 +4,9 @@
 ln -sf ~/dev/dotfiles/zshrc ~/.zshrc
 ln -sf ~/dev/dotfiles/vimrc ~/.vimrc
 
+# Run the plug installation command so YouCompleteMe is cloned for later steps
+vim +PlugInstall +qall
+
 # Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
