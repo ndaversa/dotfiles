@@ -28,6 +28,9 @@ source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source $ZSH/oh-my-zsh.sh
 
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10' # default colour doesn't work well with solarized dark in iterm2
+bindkey '^F' autosuggest-accept # fish shell style ctrl-f to accept suggestion
+
 alias vi="vim"
 
 export GPG_TTY=$(tty)
