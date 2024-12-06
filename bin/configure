@@ -19,6 +19,7 @@ vim +PlugInstall +qall
 brew install gpg
 brew install gnupg
 brew install vim
+brew install rbenv
 
 #YouCompleteMe deps
 brew install cmake python go nodejs
