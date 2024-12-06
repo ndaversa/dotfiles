@@ -48,6 +48,9 @@ map <c-space> ?
 " clear the search buffer when hitting ;return
 map <silent> <leader><cr> :noh<cr>
 
+" toggle last buffer
+nnoremap <leader><leader> <c-^>
+
 " easier navigation between split windows
 nnoremap <c-j> <c-w>j
 nnoremap <c-k> <c-w>k

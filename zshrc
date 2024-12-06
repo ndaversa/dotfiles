@@ -34,3 +34,4 @@ bindkey '^F' autosuggest-accept # fish shell style ctrl-f to accept suggestion
 alias vi="vim"
 
 export GPG_TTY=$(tty)
+eval "$(rbenv init -)"
