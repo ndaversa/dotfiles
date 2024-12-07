@@ -24,8 +24,14 @@ brew install gnupg
 brew install vim
 brew install rbenv
 
+#setup nvm
+brew install nvm
+mkdir ~/.nvm
+nvm install --lts
+nvm use --lts
+
 #YouCompleteMe deps
-brew install cmake python go nodejs
+brew install cmake python go
 brew install mono
 brew install llvm
 

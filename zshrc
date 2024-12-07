@@ -34,4 +34,6 @@ bindkey '^F' autosuggest-accept # fish shell style ctrl-f to accept suggestion
 alias vi="vim"
 
 export GPG_TTY=$(tty)
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 eval "$(rbenv init -)"
