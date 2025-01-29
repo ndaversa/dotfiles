@@ -16,6 +16,7 @@ Plug 'lambdalisue/fern.vim'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'kchmck/vim-coffee-script'
 Plug 'ctrlpvim/ctrlp.vim'
+Plug 'airblade/vim-tailwind'
 call plug#end() 
 
 syntax enable       " Enable syntax highlighting
