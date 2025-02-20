@@ -17,6 +17,7 @@ Plug 'ycm-core/YouCompleteMe'
 Plug 'kchmck/vim-coffee-script'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'airblade/vim-tailwind'
+Plug 'prettier/vim-prettier', { 'do': 'npm install' }
 call plug#end() 
 
 syntax enable       " Enable syntax highlighting
@@ -121,3 +122,7 @@ let g:ctrlp_follow_symlinks = 1
 let g:ctrlp_map = '<leader>f'
 let g:ctrlp_regexp = 0
 let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-standard | grep -v "node_modules"']
+
+" Prettier
+autocmd BufWritePre *.js,*.ts,*.json,*.html,*.css Prettier
+nnoremap <leader>p :Prettier<CR>

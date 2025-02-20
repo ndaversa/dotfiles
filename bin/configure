@@ -37,3 +37,5 @@ brew install llvm
 
 cd ~/.vim/plugged/YouCompleteMe
 python3 install.py --all
+
+npm install -g prettier  # Global installation
