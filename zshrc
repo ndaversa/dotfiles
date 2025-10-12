@@ -37,3 +37,10 @@ export GPG_TTY=$(tty)
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 eval "$(rbenv init -)"
+
+# usage:
+# cat file | pbcopy
+# or: some_command | pbcopy
+pbcopy() {
+  base64 | tr -d '\n' | awk '{printf "\033]52;c;%s\007", $0}'
+}

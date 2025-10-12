@@ -17,6 +17,7 @@ Plug 'ycm-core/YouCompleteMe'
 Plug 'kchmck/vim-coffee-script'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'airblade/vim-tailwind'
+Plug 'ojroques/vim-oscyank'
 Plug 'prettier/vim-prettier', { 'do': 'npm install' }
 call plug#end() 
 
@@ -126,3 +127,10 @@ let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files . -co --exclude-stand
 " Prettier
 autocmd BufWritePre *.js,*.ts,*.json,*.html,*.css Prettier
 nnoremap <leader>p :Prettier<CR>
+nnoremap <leader>j :Prettier<CR>
+
+" Send yanks and deletes using OSC52
+augroup YankAndDeleteToOSC52
+  autocmd!
+  autocmd TextYankPost * if index(['y','d','c'], v:event.operator) >= 0 && v:event.regname !=# '_' | execute 'OSCYankReg "' | endif
+augroup END
