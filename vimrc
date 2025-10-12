@@ -129,11 +129,20 @@ autocmd BufWritePre *.js,*.ts,*.json,*.html,*.css Prettier
 nnoremap <leader>p :Prettier<CR>
 nnoremap <leader>j :Prettier<CR>
 
-" Send yanks and deletes using OSC52
-augroup YankAndDeleteToOSC52
-  autocmd!
-  " Fire after yanks/deletes/changes that update a register
-  autocmd TextYankPost * if exists(':OSCYank') && index(['y','d','c'], v:event.operator) >= 0 && v:event.regname !=# '_'
-        \ | silent! OSCYank
-        \ | endif
-augroup END
+" Require vim-oscyank to be installed & loaded
+if (!has('nvim') && !has('clipboard_working'))
+    let s:VimOSCYankPostRegisters = ['', '+', '*']   " which regs to mirror
+    let s:VimOSCYankOperators = ['y', 'd']           " yank & delete
+
+    function! s:VimOSCYankPostCallback(event)
+        if index(s:VimOSCYankPostRegisters, a:event.regname) != -1
+                    \ && index(s:VimOSCYankOperators, a:event.operator) != -1
+            call OSCYankRegister(a:event.regname)
+        endif
+    endfunction
+
+    augroup VimOSCYankPost
+        autocmd!
+        autocmd TextYankPost * call s:VimOSCYankPostCallback(v:event)
+    augroup END
+endif
