@@ -132,5 +132,8 @@ nnoremap <leader>j :Prettier<CR>
 " Send yanks and deletes using OSC52
 augroup YankAndDeleteToOSC52
   autocmd!
-  autocmd TextYankPost * if index(['y','d','c'], v:event.operator) >= 0 && v:event.regname !=# '_' | execute 'OSCYankReg "' | endif
+  " Fire after yanks/deletes/changes that update a register
+  autocmd TextYankPost * if exists(':OSCYank') && index(['y','d','c'], v:event.operator) >= 0 && v:event.regname !=# '_'
+        \ | silent! OSCYank
+        \ | endif
 augroup END
