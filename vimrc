@@ -132,11 +132,11 @@ nnoremap <leader>p :Prettier<CR>
 nnoremap <leader>j :Prettier<CR>
 
 " Require vim-oscyank to be installed & loaded
-if (!has('nvim') && !has('clipboard_working'))
+if exists('*OSCYankRegister') && !has('nvim') && !has('clipboard_working')
     let s:VimOSCYankPostRegisters = ['', '+', '*']   " which regs to mirror
     let s:VimOSCYankOperators = ['y', 'd']           " yank & delete
 
-    function! s:VimOSCYankPostCallback(event)
+    function! s:VimOSCYankPostCallback(event) abort
         if index(s:VimOSCYankPostRegisters, a:event.regname) != -1
                     \ && index(s:VimOSCYankOperators, a:event.operator) != -1
             call OSCYankRegister(a:event.regname)
