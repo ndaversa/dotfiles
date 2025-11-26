@@ -87,7 +87,9 @@ set expandtab            " use spaces, not tabs
 set backspace=indent,eol,start    " backspace through everything in insert mode
 
 " This sends all yanks to the system clipboard (requires building vim with +clipboard support)
-set clipboard=unnamed
+if has('clipboard')
+  set clipboard=unnamedplus
+endif
 
 set ruler          " show the cursor position all the time
 set number         " show line numbers
