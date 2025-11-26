@@ -1,41 +1,121 @@
-#!/bin/bash
+#!/usr/bin/env zsh
+set -eu
+set -o pipefail
 
-# Install oh-my-zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+###############################################################################
+# Resolve dotfiles repo root (assuming this script is bin/configure)
+###############################################################################
+# $0:A = absolute path to this script; :h = dirname; :h again = parent (repo root)
+DOTFILES_DIR="${0:A:h:h}"
 
-# Make symlinks for dotfiles
-ln -sf ~/dev/dotfiles/zshrc ~/.zshrc
-ln -sf ~/dev/dotfiles/vimrc ~/.vimrc
+###############################################################################
+# oh-my-zsh
+###############################################################################
+export RUNZSH=no CHSH=no KEEP_ZSHRC=yes
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  echo "[oh-my-zsh] Installing..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+  echo "[oh-my-zsh] Already installed, leaving as-is."
+fi
 
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-completions.git ~/.oh-my-zsh/custom/plugins/zsh-completions
-git clone https://github.com/zsh-users/zsh-history-substring-search.git ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search
+# Symlink dotfiles (always enforce your versions)
+ln -sfn "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+ln -sfn "$DOTFILES_DIR/vimrc" "$HOME/.vimrc"
 
-# Run the plug installation command so YouCompleteMe is cloned for later steps
-vim +PlugInstall +qall
+###############################################################################
+# oh-my-zsh plugins (install or update to latest)
+###############################################################################
+clone_or_update() {
+  local repo="$1"
+  local dest="$2"
 
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  if [ -d "$dest/.git" ]; then
+    echo "[git] Updating ${dest:t}..."
+    git -C "$dest" pull --ff-only
+  elif [ -d "$dest" ]; then
+    echo "Warning: $dest exists but is not a git repo, skipping" >&2
+  else
+    echo "[git] Cloning ${dest:t}..."
+    git clone "$repo" "$dest"
+  fi
+}
 
-# Brew some things
-brew install gpg
-brew install gnupg
-brew install vim
-brew install rbenv
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
-#setup nvm
-brew install nvm
-mkdir ~/.nvm
-nvm install --lts
-nvm use --lts
+clone_or_update https://github.com/zsh-users/zsh-autosuggestions.git \
+  "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+clone_or_update https://github.com/zsh-users/zsh-syntax-highlighting.git \
+  "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+clone_or_update https://github.com/zsh-users/zsh-completions.git \
+  "$ZSH_CUSTOM/plugins/zsh-completions"
+clone_or_update https://github.com/zsh-users/zsh-history-substring-search.git \
+  "$ZSH_CUSTOM/plugins/zsh-history-substring-search"
 
-#YouCompleteMe deps
-brew install cmake python go
-brew install mono
-brew install llvm
+###############################################################################
+# Homebrew: install if needed, then update & upgrade your stack
+###############################################################################
+if ! command -v brew >/dev/null 2>&1; then
+  echo "[brew] Installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c \
+    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-cd ~/.vim/plugged/YouCompleteMe
-python3 install.py --all
+  # shellcheck disable=SC1091
+  if [ -d /opt/homebrew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -d /usr/local/Homebrew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+else
+  echo "[brew] Homebrew already installed."
+  # Ensure brew env is set (helpful if script is run in a bare shell)
+  if command -v /opt/homebrew/bin/brew >/dev/null 2>&1; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif command -v /usr/local/bin/brew >/dev/null 2>&1; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+fi
 
-npm install -g prettier  # Global installation
+echo "[brew] Updating and upgrading relevant packages..."
+brew update
+# Install/upgrade only the formulae this script cares about
+brew install gnupg vim rbenv nvm cmake python go mono llvm
+brew upgrade gnupg vim rbenv nvm cmake python go mono llvm || true
+
+###############################################################################
+# nvm / Node / npm: always move to latest LTS and keep default in sync
+###############################################################################
+echo "[nvm] Ensuring latest LTS node..."
+export NVM_DIR="$HOME/.nvm"
+mkdir -p "$NVM_DIR"
+# shellcheck disable=SC1091
+. "$(brew --prefix nvm)/nvm.sh"
+
+if nvm ls default >/dev/null 2>&1; then
+  nvm install 'lts/*' --latest-npm --reinstall-packages-from=default
+else
+  nvm install 'lts/*' --latest-npm
+fi
+
+nvm alias default 'lts/*'
+nvm use default
+
+echo "[npm] Installing/upgrading global tools..."
+npm install -g prettier
+
+###############################################################################
+# Vim: plugins + YouCompleteMe up-to-date
+###############################################################################
+echo "[vim] Installing/updating plugins..."
+vim +PlugInstall +PlugUpdate +qall || true
+
+YCM_DIR="$HOME/.vim/plugged/YouCompleteMe"
+if [ -d "$YCM_DIR" ]; then
+  echo "[YouCompleteMe] Rebuilding with latest deps..."
+  cd "$YCM_DIR"
+  python3 install.py --all
+else
+  echo "[YouCompleteMe] Not found at $YCM_DIR; ensure it's in vimrc and PlugInstall succeeded." >&2
+fi
+
+echo "Done. Machine is configured / upgraded."
