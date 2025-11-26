@@ -16,7 +16,6 @@ Plug 'lambdalisue/fern.vim'
 Plug 'ycm-core/YouCompleteMe'
 Plug 'kchmck/vim-coffee-script'
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'airblade/vim-tailwind'
 Plug 'ojroques/vim-oscyank'
 Plug 'prettier/vim-prettier', { 'do': 'npm install' }
 call plug#end() 
