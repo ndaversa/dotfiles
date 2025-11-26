@@ -43,7 +43,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 eval "$(rbenv init -)"
 
-eval "$(aactivator init)"
+# Only initialize aactivator if it's installed
+if command -v aactivator >/dev/null 2>&1; then
+  eval "$(aactivator init)"
+fi
 
 # usage:
 # cat file | pbcopy
