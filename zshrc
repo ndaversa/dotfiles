@@ -3,7 +3,9 @@
 
 export PATH="$HOME/.local/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
-export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+if [ "$(uname)" = "Darwin" ]; then
+  export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+fi
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="agnoster"
