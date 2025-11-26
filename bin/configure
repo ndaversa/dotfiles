@@ -2,24 +2,50 @@
 set -eu
 set -o pipefail
 
+# Ensure we are running under zsh
+if [[ -z "${ZSH_VERSION-}" ]]; then
+  echo "This script must be run with zsh (e.g.: zsh bin/configure)" >&2
+  exit 1
+fi
+
+# Make behavior predictable regardless of user options
+emulate -LR zsh
+
+###############################################################################
+# Logging helpers
+###############################################################################
+log()  { print -r -- "[configure] $*"; }
+warn() { print -r -- "[configure][WARN] $*" >&2; }
+err()  { print -r -- "[configure][ERROR] $*" >&2; }
+
 ###############################################################################
 # Resolve dotfiles repo root (assuming this script is bin/configure)
 ###############################################################################
-# $0:A = absolute path to this script; :h = dirname; :h again = parent (repo root)
+# $0:A = absolute path; :h = dirname; :h again = parent (repo root)
 DOTFILES_DIR="${0:A:h:h}"
+log "Dotfiles directory: $DOTFILES_DIR"
 
 ###############################################################################
 # oh-my-zsh
 ###############################################################################
 export RUNZSH=no CHSH=no KEEP_ZSHRC=yes
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  echo "[oh-my-zsh] Installing..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+  log "Installing oh-my-zsh..."
+  tmp_omz="$(mktemp -t omz-install.XXXXXX)"
+  if ! curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$tmp_omz"; then
+    err "Failed to download oh-my-zsh installer."
+    rm -f "$tmp_omz"
+    exit 1
+  fi
+  sh "$tmp_omz"
+  rm -f "$tmp_omz"
 else
-  echo "[oh-my-zsh] Already installed, leaving as-is."
+  log "oh-my-zsh already installed."
 fi
 
 # Symlink dotfiles (always enforce your versions)
+log "Symlinking dotfiles..."
 ln -sfn "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
 ln -sfn "$DOTFILES_DIR/vimrc" "$HOME/.vimrc"
 
@@ -30,13 +56,13 @@ clone_or_update() {
   local repo="$1"
   local dest="$2"
 
-  if [ -d "$dest/.git" ]; then
-    echo "[git] Updating ${dest:t}..."
+  if [[ -d "$dest/.git" ]]; then
+    log "Updating plugin ${dest:t}..."
     git -C "$dest" pull --ff-only
-  elif [ -d "$dest" ]; then
-    echo "Warning: $dest exists but is not a git repo, skipping" >&2
+  elif [[ -d "$dest" ]]; then
+    warn "Path exists but is not a git repo, skipping: $dest"
   else
-    echo "[git] Cloning ${dest:t}..."
+    log "Cloning plugin ${dest:t}..."
     git clone "$repo" "$dest"
   fi
 }
@@ -53,69 +79,100 @@ clone_or_update https://github.com/zsh-users/zsh-history-substring-search.git \
   "$ZSH_CUSTOM/plugins/zsh-history-substring-search"
 
 ###############################################################################
-# Homebrew: install if needed, then update & upgrade your stack
+# Homebrew: macOS only
 ###############################################################################
-if ! command -v brew >/dev/null 2>&1; then
-  echo "[brew] Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c \
-    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+OS="$(uname -s)"
 
-  # shellcheck disable=SC1091
-  if [ -d /opt/homebrew ]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [ -d /usr/local/Homebrew ]; then
-    eval "$(/usr/local/bin/brew shellenv)"
+if [[ "$OS" == "Darwin" ]]; then
+  if ! command -v brew >/dev/null 2>&1; then
+    log "Installing Homebrew..."
+    tmp_brew="$(mktemp -t brew-install.XXXXXX)"
+    if ! curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o "$tmp_brew"; then
+      err "Failed to download Homebrew installer."
+      rm -f "$tmp_brew"
+      exit 1
+    fi
+    NONINTERACTIVE=1 /bin/bash "$tmp_brew"
+    rm -f "$tmp_brew"
+
+    # Initialize brew env
+    if [[ -d /opt/homebrew ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -d /usr/local/Homebrew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+  else
+    log "Homebrew already installed."
+    # Ensure brew env is set even if shell hasn’t loaded it
+    if command -v /opt/homebrew/bin/brew >/dev/null 2>&1; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif command -v /usr/local/bin/brew >/dev/null 2>&1; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+  fi
+
+  if [[ -f "$DOTFILES_DIR/Brewfile" ]]; then
+    log "Applying Brewfile and upgrading packages..."
+    brew update
+    brew bundle --file="$DOTFILES_DIR/Brewfile"
+    # Upgrade everything; comment this out if you want only Brewfile-managed upgrades
+    brew upgrade || true
+  else
+    warn "No Brewfile found at $DOTFILES_DIR/Brewfile; skipping brew bundle."
   fi
 else
-  echo "[brew] Homebrew already installed."
-  # Ensure brew env is set (helpful if script is run in a bare shell)
-  if command -v /opt/homebrew/bin/brew >/dev/null 2>&1; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif command -v /usr/local/bin/brew >/dev/null 2>&1; then
-    eval "$(/usr/local/bin/brew shellenv)"
+  warn "Non-macOS system detected ($OS); skipping Homebrew setup."
+fi
+
+###############################################################################
+# nvm / Node / npm: macOS + Homebrew only
+###############################################################################
+if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+  if [[ -d "$(brew --prefix nvm 2>/dev/null || true)" ]]; then
+    log "Ensuring latest LTS Node via nvm..."
+    export NVM_DIR="$HOME/.nvm"
+    mkdir -p "$NVM_DIR"
+    # Load nvm
+    # shellcheck disable=SC1091
+    . "$(brew --prefix nvm)/nvm.sh"
+
+    if nvm ls default >/dev/null 2>&1; then
+      nvm install 'lts/*' --latest-npm --reinstall-packages-from=default
+    else
+      nvm install 'lts/*' --latest-npm
+    fi
+
+    nvm alias default 'lts/*'
+    nvm use default
+
+    log "Installing/upgrading global npm tools..."
+    npm install -g prettier
+  else
+    warn "nvm is not installed via Homebrew (no $(brew --prefix nvm 2>/dev/null || true)); skipping Node setup."
   fi
-fi
-
-echo "[brew] Updating and upgrading relevant packages..."
-brew update
-# Install/upgrade only the formulae this script cares about
-brew install gnupg vim rbenv nvm cmake python go mono llvm
-brew upgrade gnupg vim rbenv nvm cmake python go mono llvm || true
-
-###############################################################################
-# nvm / Node / npm: always move to latest LTS and keep default in sync
-###############################################################################
-echo "[nvm] Ensuring latest LTS node..."
-export NVM_DIR="$HOME/.nvm"
-mkdir -p "$NVM_DIR"
-# shellcheck disable=SC1091
-. "$(brew --prefix nvm)/nvm.sh"
-
-if nvm ls default >/dev/null 2>&1; then
-  nvm install 'lts/*' --latest-npm --reinstall-packages-from=default
 else
-  nvm install 'lts/*' --latest-npm
+  warn "Skipping nvm/Node setup (not macOS or brew not available)."
 fi
-
-nvm alias default 'lts/*'
-nvm use default
-
-echo "[npm] Installing/upgrading global tools..."
-npm install -g prettier
 
 ###############################################################################
 # Vim: plugins + YouCompleteMe up-to-date
 ###############################################################################
-echo "[vim] Installing/updating plugins..."
-vim +PlugInstall +PlugUpdate +qall || true
+if command -v vim >/dev/null 2>&1; then
+  log "Installing/updating Vim plugins..."
+  # -e (ex mode), -s (silent), -u for explicit vimrc
+  vim -es -u "$HOME/.vimrc" +PlugInstall +PlugUpdate +qall || \
+    warn "Vim plugin installation/update reported a non-zero exit code."
 
-YCM_DIR="$HOME/.vim/plugged/YouCompleteMe"
-if [ -d "$YCM_DIR" ]; then
-  echo "[YouCompleteMe] Rebuilding with latest deps..."
-  cd "$YCM_DIR"
-  python3 install.py --all
+  YCM_DIR="$HOME/.vim/plugged/YouCompleteMe"
+  if [[ -d "$YCM_DIR" ]]; then
+    log "Rebuilding YouCompleteMe..."
+    cd "$YCM_DIR"
+    python3 install.py --all
+  else
+    warn "YouCompleteMe not found at $YCM_DIR; ensure it's in vimrc and PlugInstall succeeded."
+  fi
 else
-  echo "[YouCompleteMe] Not found at $YCM_DIR; ensure it's in vimrc and PlugInstall succeeded." >&2
+  warn "vim not found in PATH; skipping Vim plugin/YCM setup."
 fi
 
-echo "Done. Machine is configured / upgraded."
+log "Done. Machine is configured / upgraded."
