@@ -125,6 +125,38 @@ else
 fi
 
 ###############################################################################
+# aactivator via pipx (for dir-based env activation like Yelp devboxes)
+###############################################################################
+if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+  # Ensure pipx is available
+  if ! command -v pipx >/dev/null 2>&1; then
+    log "Installing pipx via Homebrew..."
+    if ! brew install pipx; then
+      warn "Failed to install pipx via Homebrew."
+    fi
+  else
+    log "pipx already installed."
+  fi
+
+  # Make sure pipx's bin dir is on PATH for future shells
+  if command -v pipx >/dev/null 2>&1; then
+    pipx ensurepath || warn "pipx ensurepath reported a non-zero exit code."
+  fi
+
+  # Install aactivator if missing
+  if ! command -v aactivator >/dev/null 2>&1; then
+    log "Installing aactivator via pipx..."
+    if ! pipx install aactivator; then
+      warn "Failed to install aactivator via pipx."
+    fi
+  else
+    log "aactivator already installed."
+  fi
+else
+  warn "Skipping aactivator setup (not macOS or Homebrew not available)."
+fi
+
+###############################################################################
 # nvm / Node / npm: macOS + Homebrew only
 ###############################################################################
 if [[ "$OS" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
