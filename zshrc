@@ -127,10 +127,11 @@ pxp_sync_onpoint() {
   echo
   # -----------------------------------------------------
 
-  local default_future_days=60
+  # ------- Days forward (END_DATE) -------
+  local default_future_days=90
   local future_days
 
-  # Optional positional arg overrides the prompt
+  # Optional positional arg $1 overrides the prompt
   if [[ -n "$1" ]]; then
     future_days="$1"
   else
@@ -142,7 +143,28 @@ pxp_sync_onpoint() {
 
   # Strict non-negative integer check (zsh)
   if [[ "$future_days" != <-> ]]; then
-    echo "Error: please enter a non-negative integer for days."
+    echo "Error: please enter a non-negative integer for future days."
+    popd >/dev/null
+    return 1
+  fi
+
+  # ------- Days back (START_DATE) -------
+  local default_past_days=30
+  local past_days
+
+  # Optional positional arg $2 overrides the prompt
+  if [[ -n "$2" ]]; then
+    past_days="$2"
+  else
+    echo
+    read -r "past_days?How many days into the past for START_DATE? (default ${default_past_days}): "
+    if [[ -z "$past_days" ]]; then
+      past_days=$default_past_days
+    fi
+  fi
+
+  if [[ "$past_days" != <-> ]]; then
+    echo "Error: please enter a non-negative integer for past days."
     popd >/dev/null
     return 1
   fi
@@ -150,15 +172,17 @@ pxp_sync_onpoint() {
   local start_date end_date
 
   # macOS (BSD) date vs GNU date
-  if date -v-14d +%Y-%m-%d >/dev/null 2>&1; then
-    start_date=$(date -v-14d +%Y-%m-%d)
-    end_date=$(date -v+${future_days}d +%Y-%m-%d)
+  if date -v-1d +%Y-%m-%d >/dev/null 2>&1; then
+    # BSD date syntax (macOS)
+    start_date=$(date -v-"${past_days}"d +%Y-%m-%d)
+    end_date=$(date -v+"${future_days}"d +%Y-%m-%d)
   else
-    start_date=$(date -d "14 days ago" +%Y-%m-%d)
+    # GNU date syntax (Linux)
+    start_date=$(date -d "${past_days} days ago" +%Y-%m-%d)
     end_date=$(date -d "+${future_days} days" +%Y-%m-%d)
   fi
 
-  echo "Using start date: $start_date   (today - 14 days)"
+  echo "Using start date: $start_date   (today - ${past_days} days)"
   echo "Using end date:   $end_date     (today + ${future_days} days)"
   echo
 
